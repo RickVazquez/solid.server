@@ -1,0 +1,65 @@
+{
+  "name": "solid-server",
+  "description": "Real time REST API for Solid Studio",
+  "version": "0.0.0",
+  "main": "src",
+  "keywords": [
+    "feathers"
+  ],
+  "author": {
+    "name": "Labchain",
+    "email": "contacto@labchain.io"
+  },
+  "contributors": [],
+  "bugs": {},
+  "directories": {
+    "lib": "src",
+    "test": "test/",
+    "config": "config/"
+  },
+  "engines": {
+    "node": "^10.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "scripts": {
+    "test": "npm run build && npm run jest --watch",
+    "dev": "ts-node-dev --no-notify src/",
+    "start": "npm run build && node dist/",
+    "jest": "jest -- --forceExit",
+    "build": "shx rm -rf lib/ && tsc"
+  },
+  "dependencies": {
+    "@feathersjs/configuration": "^4.3.1",
+    "@feathersjs/errors": "^4.3.1",
+    "@feathersjs/express": "^4.3.1",
+    "@feathersjs/feathers": "^4.3.1",
+    "@feathersjs/socketio": "^4.3.1",
+    "async-polling": "^0.2.1",
+    "bottleneck": "^2.19.5",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "feathers-nedb": "^5.0.1",
+    "feathers-swagger": "^1.1.0",
+    "helmet": "^3.21.0",
+    "nedb": "^1.8.0",
+    "serve-favicon": "^2.5.0",
+    "web3": "^1.0.0-beta.55",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.0.1",
+    "@types/cors": "^2.8.6",
+    "@types/helmet": "0.0.44",
+    "@types/jest": "^24.0.18",
+    "@types/nedb": "^1.8.9",
+    "@types/serve-favicon": "^2.2.31",
+    "axios": "^0.19.0",
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.2",
+    "shx": "^0.3.2",
+    "ts-jest": "^24.0.2",
+    "ts-node-dev": "^1.0.0-pre.42",
+    "tslint": "^5.19.0",
+    "typescript": "^3.6.2"
+  }
+}
