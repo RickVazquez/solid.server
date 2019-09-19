@@ -6,7 +6,7 @@ WORKDIR /opt/app
 
 # install and cache app dependencies
 COPY package.json ./
-RUN npm install --silent
+RUN npm install
 
 COPY . .
 
