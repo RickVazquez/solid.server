@@ -1,4 +1,4 @@
-import { Service, NedbServiceOptions } from 'feathers-nedb';
+import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
 import { Application } from '../../declarations';
 
 import { Params } from 'express-serve-static-core';
@@ -17,7 +17,7 @@ export interface Contract {
 }
 
 export class Contracts extends Service {
-  constructor(options: Partial<NedbServiceOptions>, app: Application) {
+  constructor(options: Partial<SequelizeServiceOptions>, app: Application) {
     super(options);
   }
 

@@ -1,4 +1,4 @@
-import { removeAllContractDefinitions, addContractDefinitionsFromFaker } from './utils'
+import { removeAllContractDefinitionsIfExists, addContractDefinitionsFromFaker } from './utils'
 
 import logger from './logger';
 import app from './app';
@@ -12,7 +12,7 @@ process.on('unhandledRejection', (reason, p) =>
 
 server.on('listening', async () => {
   // TODO: REMOVE AFTER DEMO
-  await removeAllContractDefinitions(app)
+  await removeAllContractDefinitionsIfExists(app)
   await addContractDefinitionsFromFaker(app)
   logger.info('Feathers application started on http://%s:%d', app.get('host'), port)
 });
