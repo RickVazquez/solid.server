@@ -23,7 +23,7 @@ contract SimpleStorage {
         return value;
     }
 }`,
-        abi: [
+        abi: JSON.stringify([
             {
                 "constant": false,
                 "inputs": [
@@ -49,7 +49,7 @@ contract SimpleStorage {
                 "stateMutability": "nonpayable",
                 "type": "constructor"
             }
-        ],
+        ]),
         bytecode: simpleStorageByteCode
     }
 
@@ -80,7 +80,7 @@ contract SimpleRegistry {
         return true;
     }
 }`,
-            abi: [
+            abi: JSON.stringify([
                 {
                     "constant": false,
                     "inputs": [
@@ -110,7 +110,7 @@ contract SimpleRegistry {
                     "stateMutability": "nonpayable",
                     "type": "constructor"
                 }
-            ],
+            ]),
             bytecode: simpleStorage2ByteCode
         }]
 

@@ -1,4 +1,4 @@
-import { Service, NedbServiceOptions } from 'feathers-nedb';
+import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
 import { TransactionReceipt } from 'web3-core'
 
 import { Params } from 'express-serve-static-core';
@@ -10,7 +10,7 @@ export interface Transaction extends TransactionReceipt {
 }
 
 export class Transactions extends Service {
-  constructor(options: Partial<NedbServiceOptions>, app: Application) {
+  constructor(options: Partial<SequelizeServiceOptions>, app: Application) {
     super(options);
   }
 

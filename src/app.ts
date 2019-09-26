@@ -19,6 +19,8 @@ import channels from './channels';
 
 const swagger = require('feathers-swagger');
 
+import sequelize from './sequelize';
+
 const app: Application = express(feathers());
 
 // Load app configuration
@@ -46,6 +48,8 @@ app.configure(swagger({
         description: 'A description'
     }
 }));
+
+app.configure(sequelize);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware);

@@ -1,8 +1,8 @@
-import { Service, NedbServiceOptions } from 'feathers-nedb';
+import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
 import { Application } from '../../declarations';
 
 export class Blocks extends Service {
-  constructor(options: Partial<NedbServiceOptions>, app: Application) {
+  constructor(options: Partial<SequelizeServiceOptions>, app: Application) {
     super(options);
   }
-};
+}

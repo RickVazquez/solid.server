@@ -3,7 +3,7 @@ import app from '../../src/app';
 import assert from 'assert'
 // const assert = require('assert');
 
-describe('\'contract-definitions\' service', () => {
+describe('contract-definitions service', () => {
   it('registered the service', () => {
     const service = app.service('contract-definitions');
     expect(service).toBeTruthy();
@@ -12,7 +12,7 @@ describe('\'contract-definitions\' service', () => {
   it('creates a contract definition', async () => {
     const name = "SimpleStorage.sol"
     const sourceCode = "code"
-    const abi = [
+    const abi = JSON.stringify([
       {
         "constant": true,
         "inputs": [],
@@ -61,14 +61,15 @@ describe('\'contract-definitions\' service', () => {
         "stateMutability": "nonpayable",
         "type": "constructor"
       }
-    ]
+    ])
     const bytecode = "bytecode"
 
     const contractDefinition = await app.service('contract-definitions').create({
       name,
       sourceCode,
       abi,
-      bytecode
+      bytecode,
+      runtimeBycode: bytecode
     });
 
     assert.equal(contractDefinition.name, name);
