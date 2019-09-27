@@ -2,17 +2,19 @@
 import Bottleneck from 'bottleneck'
 import { TransactionReceipt } from 'web3-core'
 
-import { Application } from '../../declarations'
+import { Connection, BlockProcessed, Transaction, ContractDefinition, Contract } from '@solidstudio/solid.types'
 
+import { Application } from '../../declarations'
 import { IWeb3Wrapper } from '../web3-wrapper/IWeb3Wrapper'
 
-import { Connection, Connections, BlockProcessed } from '../../services/connections/connections.class'
+// services
+import { ContractDefinitions } from '../../services/contract-definitions/contract-definitions.class'
+import { Transactions } from '../../services/transactions/transactions.class'
+import { Connections } from '../../services/connections/connections.class'
+import { Contracts } from '../../services/contracts/contracts.class'
 
 import { IBlockchainProcessor } from './IBlockchainProcessor'
 import { IPollingService } from './IPollingService'
-import { Transactions, Transaction } from '../../services/transactions/transactions.class'
-import { ContractDefinitions, ContractDefinition } from '../../services/contract-definitions/contract-definitions.class'
-import { Contract, Contracts } from '../../services/contracts/contracts.class'
 
 const POLLING_INTERVAL = 1000 // TODO, move to factory, singleton class
 
@@ -34,7 +36,7 @@ export class BlockchainProcessor implements IBlockchainProcessor {
 
     this.limiter = new Bottleneck({
       maxConcurrent: 1,
-      minTime: parseInt(process.env.BLOCKCHAIN_MAX_REQUESTS_PER_SECOND || '10', undefined)
+      minTime: 210
     })
 
     this.connectionService = app.service('connections')
@@ -138,7 +140,7 @@ export class BlockchainProcessor implements IBlockchainProcessor {
       // this.connection.transactionReceipts.push(receipt)
       const newTransaction: Transaction = {
         ...receipt,
-        connectionId: this.connection._id
+        connectionId: this.connection.id
       }
 
       await this.transactionsService.create(newTransaction)
@@ -157,13 +159,16 @@ export class BlockchainProcessor implements IBlockchainProcessor {
           return element.runtimeBycode === runtimeByteCode
         });
 
+        // connectionId as number in Contract 
+        // runtimeBycode in ContractDefinition
+
         const newContract: Contract = {
           name: itemFound ? itemFound.name : "--",
           sourceCode: itemFound ? itemFound.sourceCode : "--",
           abi: itemFound ? itemFound.abi : [],
           bytecode: itemFound ? itemFound.bytecode : "",
           address: receipt.contractAddress,
-          connectionId: this.connection._id,
+          connectionId: this.connection.id,
           creationDate: new Date().toLocaleDateString(),
           lastExecutionDate: new Date().toLocaleDateString(),
           transactionCount: transactionCount
@@ -175,7 +180,7 @@ export class BlockchainProcessor implements IBlockchainProcessor {
       if (this.connection.lastBlockProcessed) {
         this.connection.lastBlockProcessed.blockNumber = blockNumber
         this.connection.lastBlockProcessed.transactionHash = txHash
-        await this.connectionService.update(this.connection._id, this.connection)
+        await this.connectionService.update(this.connection.id, this.connection)
       }
 
 

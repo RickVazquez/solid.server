@@ -1,20 +1,8 @@
 import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
-import { Application } from '../../declarations';
-
 import { Params } from 'express-serve-static-core';
 
-export interface BlockProcessed {
-  blockNumber: number
-  transactionHash: string
-  logIndex: number
-}
-
-export interface Connection {
-  _id: string
-  name: string
-  url: string
-  lastBlockProcessed?: BlockProcessed
-}
+import { Connection } from '@solidstudio/solid.types'
+import { Application } from '../../declarations';
 
 export class Connections extends Service {
   constructor(options: Partial<SequelizeServiceOptions>, app: Application) {

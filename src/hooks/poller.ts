@@ -5,7 +5,7 @@ import { Hook, HookContext } from '@feathersjs/feathers';
 import { BlockchainProcessor } from '../local_modules/event-processor/BlockchainProcessor'
 import { PollingService } from '../local_modules/event-processor/PollingService'
 import { Web3Wrapper } from '../local_modules/web3-wrapper/Web3Wrapper'
-import { Connection } from '../services/connections/connections.class';
+import { Connection } from '@solidstudio/solid.types';
 
 export default (options = {}): Hook => {
   return async (context: HookContext) => {

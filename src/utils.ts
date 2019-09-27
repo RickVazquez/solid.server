@@ -1,7 +1,6 @@
-import { Application } from './declarations';
+import { ContractDefinition, buildFakeContractDefinitions } from '@solidstudio/solid.types';
 
-import { buildFakeContractDefinitions } from './services/contract-definitions/faker'
-import { ContractDefinition } from './services/contract-definitions/contract-definitions.class';
+import { Application } from './declarations';
 
 export const removeAllContractDefinitionsIfExists = async (app: Application) => {
     const contractDefinitionsService = app.service('contract-definitions');
