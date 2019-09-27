@@ -1,20 +1,16 @@
 import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
-import { TransactionReceipt } from 'web3-core'
-
 import { Params } from 'express-serve-static-core';
 
-import { Application } from '../../declarations';
+import { Transaction } from '@solidstudio/solid.types';
 
-export interface Transaction extends TransactionReceipt {
-  connectionId: string
-}
+import { Application } from '../../declarations';
 
 export class Transactions extends Service {
   constructor(options: Partial<SequelizeServiceOptions>, app: Application) {
     super(options);
   }
 
-  create(data: TransactionReceipt, params?: Params) {
+  create(data: Transaction, params?: Params) {
     return super.create(data, params);
   }
 };
