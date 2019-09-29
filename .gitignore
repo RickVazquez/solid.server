@@ -112,3 +112,4 @@ lib/
 data/
 dist/
 TODO*
+solid_server.sqlite
