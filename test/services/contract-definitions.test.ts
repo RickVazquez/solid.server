@@ -1,82 +1,34 @@
 import app from '../../src/app';
+import { buildFakeContractDefinition, ContractDefinition } from '@solidstudio/solid.types';
 
-import assert from 'assert'
-// const assert = require('assert');
 
-describe('contract-definitions service', () => {
+describe('ContractDefinitions service', () => {
+
+  beforeAll(async () => {
+    const sequelise = app.get('sequelizeClient')
+
+    await sequelise.sync({ force: true })
+  })
+
   it('registered the service', () => {
     const service = app.service('contract-definitions');
+
     expect(service).toBeTruthy();
   });
 
   it('creates a contract definition', async () => {
-    const name = "SimpleStorage.sol"
-    const sourceCode = "code"
-    const abi = JSON.stringify([
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "getValue",
-        "outputs": [
-          {
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "value",
-        "outputs": [
-          {
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [],
-        "name": "getValueLast",
-        "outputs": [
-          {
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      }
-    ])
-    const bytecode = "bytecode"
+    const sampleContractDefinition = buildFakeContractDefinition()
 
-    const contractDefinition = await app.service('contract-definitions').create({
-      name,
-      sourceCode,
-      abi,
-      bytecode,
-      runtimeBycode: bytecode
-    });
+    const service = app.service('contract-definitions')
 
-    assert.equal(contractDefinition.name, name);
-    assert.equal(contractDefinition.sourceCode, sourceCode);
-    assert.deepEqual(contractDefinition.abi, abi);
-    assert.equal(contractDefinition.bytecode, bytecode);
+    const contractDefinition: ContractDefinition = await service.create(sampleContractDefinition);
 
-    assert.ok(contractDefinition._id !== undefined)
+    expect(contractDefinition).toBeTruthy()
+    expect(contractDefinition.name).toEqual(sampleContractDefinition.name)
+    expect(contractDefinition.sourceCode).toEqual(sampleContractDefinition.sourceCode)
+    expect(contractDefinition.bytecode).toEqual(sampleContractDefinition.bytecode)
+    expect(contractDefinition.abi).toEqual(sampleContractDefinition.abi)
+    expect(contractDefinition.id).toBeGreaterThan(0)
+    expect(contractDefinition.id).toBeTruthy()
   });
 });

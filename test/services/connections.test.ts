@@ -24,7 +24,7 @@ describe('Connections service', () => {
     sampleConnection.id = undefined
 
     const service = app.service('connections')
-    const connection = await service.create(sampleConnection);
+    const connection: Connection = await service.create(sampleConnection);
 
     expect(connection.name).toEqual('Connection 1');
     expect(connection.url).toEqual('http://localhost:8545');

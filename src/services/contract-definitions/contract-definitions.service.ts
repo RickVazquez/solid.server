@@ -25,9 +25,7 @@ export default function (app: Application) {
   // Initialize our service with any options it requires
   app.use('/contract-definitions', new ContractDefinitions(options, app));
 
-  Model.sync().then(() => {
-    // Get our initialized service so that we can register hooks
-    const service = app.service('contract-definitions');
-    service.hooks(hooks);
-  })
+  const service = app.service('contract-definitions');
+
+  service.hooks(hooks);
 }

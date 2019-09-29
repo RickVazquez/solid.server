@@ -1,5 +1,5 @@
 import { Service, SequelizeServiceOptions } from 'feathers-sequelize';
-import { Params } from 'express-serve-static-core';
+// import { Params } from 'express-serve-static-core';
 
 import { ContractDefinition } from '@solidstudio/solid.types'
 
@@ -10,7 +10,7 @@ export class ContractDefinitions extends Service<ContractDefinition> {
     super(options);
   }
 
-  create(data: ContractDefinition, params?: Params) {
-    return super.create(data, params);
-  }
+  // create(data: ContractDefinition, params?: Params) {
+  //   return super.create(data, params);
+  // }
 };
