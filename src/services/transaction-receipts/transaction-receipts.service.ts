@@ -18,7 +18,8 @@ export default function (app: Application) {
 
   const options = {
     Model,
-    paginate
+    paginate,
+    multi: true
   };
 
   // Initialize our service with any options it requires

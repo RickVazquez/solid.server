@@ -19,8 +19,6 @@ describe('Transactions service', () => {
     const sampleConnection = buildFakeConnection()
     const sampleTransaction = buildFakeTransaction()
 
-    console.log("TRANSACTION SAMPLE", sampleTransaction)
-
     const transactionsService = app.service('transactions')
     const connectionService = app.service('connections')
 
@@ -38,15 +36,13 @@ describe('Transactions service', () => {
     expect(transaction).toBeTruthy()
     expect(transaction.blockNumber).toEqual(sampleTransaction.blockNumber)
 
-    // const transactionFound = await transactionsService.find({
-    //   hash: transaction.hash
-    // })
+    const transactionFound = await transactionsService.find({
+      hash: transaction.hash
+    })
 
-    // expect(transactionFound).toBeTruthy()
-    // console.log("TRANSACTION FOUND", transactionFound)
-    // expect(transactionFound.data[0].transactions).toHaveLength(sampleBlock.transactions.length)
-    // expect(transactionFound.data[0].blockNumber).toEqual(sampleBlock.blockNumber)
-    // expect(transactionFound.data[0].connectionId).toEqual(sampleBlock.connectionId)
-    // expect(transactionFound.data[0].hash).toEqual(sampleBlock.hash)
+    expect(transactionFound).toBeTruthy()
+    expect(transactionFound.data[0].blockNumber).toEqual(sampleTransaction.blockNumber)
+    expect(transactionFound.data[0].connectionId).toEqual(sampleTransaction.connectionId)
+    expect(transactionFound.data[0].hash).toEqual(sampleTransaction.hash)
   })
 });
