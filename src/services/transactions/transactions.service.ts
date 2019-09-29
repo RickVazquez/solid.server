@@ -18,14 +18,17 @@ export default function (app: Application) {
 
   const options = {
     Model,
-    paginate
+    paginate,
+    multi: true
   };
 
   // Initialize our service with any options it requires
   app.use('/transactions', new Transactions(options, app));
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('transactions');
+  Model.sync().then(() => {
+    // Get our initialized service so that we can register hooks
+    const service = app.service('transactions');
 
-  service.hooks(hooks);
+    service.hooks(hooks);
+  })
 }

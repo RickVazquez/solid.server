@@ -4,6 +4,8 @@ import contractDefinitions from './contract-definitions/contract-definitions.ser
 import contracts from './contracts/contracts.service';
 import transactions from './transactions/transactions.service';
 import blocks from './blocks/blocks.service';
+import transactionReceipts from './transaction-receipts/transaction-receipts.service';
+import traces from './traces/traces.service';
 // Don't remove this comment. It's needed to format import lines nicely.
 
 export default function (app: Application) {
@@ -12,4 +14,6 @@ export default function (app: Application) {
   app.configure(contracts);
   app.configure(transactions);
   app.configure(blocks);
+  app.configure(transactionReceipts);
+  app.configure(traces);
 }

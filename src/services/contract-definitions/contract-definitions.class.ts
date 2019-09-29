@@ -5,7 +5,7 @@ import { ContractDefinition } from '@solidstudio/solid.types'
 
 import { Application } from '../../declarations';
 
-export class ContractDefinitions extends Service {
+export class ContractDefinitions extends Service<ContractDefinition> {
   constructor(options: Partial<SequelizeServiceOptions>, app: Application) {
     super(options);
   }

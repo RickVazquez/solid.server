@@ -4,11 +4,12 @@ import { Application } from '../../declarations';
 import { Blocks } from './blocks.class';
 import createModel from '../../models/blocks.model';
 import hooks from './blocks.hooks';
+import { Block } from '@solidstudio/solid.types';
 
 // Add this service to the service type index
 declare module '../../declarations' {
   interface ServiceTypes {
-    'blocks': Blocks & ServiceAddons<any>;
+    'blocks': Blocks & ServiceAddons<Block>;
   }
 }
 
@@ -18,14 +19,19 @@ export default function (app: Application) {
 
   const options = {
     Model,
-    paginate
+    paginate,
+    multi: true
   };
 
   // Initialize our service with any options it requires
   app.use('/blocks', new Blocks(options, app));
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('blocks');
+  Model.sync({ force: true }).then(() => {
+    // Get our initialized service so that we can register hooks
+    const service = app.service('blocks');
 
-  service.hooks(hooks);
+    service.hooks(hooks);
+  })
+
+
 }

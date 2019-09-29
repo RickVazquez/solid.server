@@ -1,10 +1,13 @@
 
+import beforeCreateBlock from '../../hooks/before-create-block';
+import afterFindBlock from '../../hooks/after-find-block';
+
 export default {
   before: {
-    all: [],
+    all: [function (context) { console.log('Before All Hooks!'); }],
     find: [],
     get: [],
-    create: [],
+    create: [beforeCreateBlock()],
     update: [],
     patch: [],
     remove: []
@@ -12,7 +15,7 @@ export default {
 
   after: {
     all: [],
-    find: [],
+    find: [afterFindBlock()],
     get: [],
     create: [],
     update: [],
