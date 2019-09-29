@@ -23,6 +23,9 @@
   },
   "scripts": {
     "test:blockchain": "jest BlockchainSynchronizer.test.ts --silent=false --verbose",
+    "test:blocks": "jest blocks.test.ts --forceExit --watch --silent=false --verbose",
+    "test:transactions": "jest transactions.test.ts --forceExit --watch --silent=false --verbose",
+    "test:connections": "jest connections.test.ts --forceExit --watch --silent=false --verbose",
     "test": "npm run build && jest --watch --forceExit",
     "dev": "ts-node-dev --no-notify src/",
     "start": "npm run build && node dist/",

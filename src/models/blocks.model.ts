@@ -13,11 +13,12 @@ type BlockModelStatic = typeof Model & {
 
 export default function (app: Application) {
   const sequelize: Sequelize = app.get('sequelizeClient');
+  const { connections } = sequelize.models
 
   const blocks = <BlockModelStatic>sequelize.define('blocks', {
     // do I need primary key? It should be blockHash..
     blockNumber: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     hash: {
@@ -57,15 +58,15 @@ export default function (app: Application) {
       allowNull: false
     },
     gasLimit: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     gasUsed: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     timestamp: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     receiptRoot: {
@@ -77,15 +78,15 @@ export default function (app: Application) {
       allowNull: false,
     },
     size: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     difficulty: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     totalDifficulty: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     uncles: {
@@ -93,15 +94,26 @@ export default function (app: Application) {
       allowNull: false,
     },
     connectionId: {
-      type: DataTypes.INTEGER.UNSIGNED, // FOREIGN KEY, INDEX
-      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: {
+        model: connections,
+        key: 'id'
+      }
     }
   }, {
     hooks: {
       beforeCount(options: any) {
         options.raw = true;
       }
-    }
+    },
+    indexes: [{
+      unique: true,
+      fields: ['blockNumber']
+    }]
+    // {
+    // unique: true,
+    // fields: ['hash']
+    // }
   })
 
   return blocks;

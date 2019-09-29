@@ -25,8 +25,17 @@ export default function (app: Application) {
   // Initialize our service with any options it requires
   app.use('/connections', new Connections(options, app));
 
+  // Model.sync().then(() => {
+  //   // Get our initialized service so that we can register hooks
+  //   const service = app.service('connections');
+  //   service.hooks(hooks);
+  // })
+
   // Get our initialized service so that we can register hooks
-  const service = app.service('connections');
+
+  // lastBlockProcessed
+  // lastTransactionProcessed
+  // lastLogIndexProcessed
 
   // (service as any).docs = {
   //   description: 'Service to manage projects',
@@ -51,7 +60,9 @@ export default function (app: Application) {
   //   }
   // };
 
+  const service = app.service('connections');
   service.hooks(hooks);
+  // service.hooks(hooks);
   // app.use('/connections', service);
 }
 

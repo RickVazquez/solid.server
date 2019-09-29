@@ -26,12 +26,11 @@ export default function (app: Application) {
   // Initialize our service with any options it requires
   app.use('/blocks', new Blocks(options, app));
 
-  Model.sync({ force: true }).then(() => {
-    // Get our initialized service so that we can register hooks
-    const service = app.service('blocks');
+  // Model.sync({ force: true }).then(() => {
+  //   // Get our initialized service so that we can register hooks
 
-    service.hooks(hooks);
-  })
+  // })
+  const service = app.service('blocks');
 
-
+  service.hooks(hooks);
 }
