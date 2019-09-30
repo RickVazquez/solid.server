@@ -61,6 +61,7 @@ export default function (app: Application) {
   // };
 
   const service = app.service('connections');
+
   service.hooks(hooks);
   // service.hooks(hooks);
   // app.use('/connections', service);

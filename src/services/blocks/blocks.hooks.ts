@@ -16,7 +16,7 @@ export default {
   after: {
     all: [],
     find: [afterFindBlock()],
-    get: [],
+    get: [afterFindBlock()],
     create: [],
     update: [],
     patch: [],

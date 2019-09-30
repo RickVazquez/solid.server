@@ -1,27 +1,82 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, Model, BuildOptions } from 'sequelize';
+
+import { Contract } from '@solidstudio/solid.types';
+
 import { Application } from '../declarations';
 
+interface ContractModel extends Model, Contract {
+}
+
+type ContractModelStatic = typeof Model & {
+  new(values?: object, options?: BuildOptions): ContractModel;
+}
+
 export default function (app: Application) {
-  const sequelizeClient: Sequelize = app.get('sequelizeClient');
+  const sequelize: Sequelize = app.get('sequelizeClient');
+  const { connections } = sequelize.models
 
-  const contracts = sequelizeClient.define('contracts', {
-    text: {
-      type: DataTypes.STRING,
-      allowNull: false
-    }
-  }, {
-    hooks: {
-      beforeCount(options: any) {
-        options.raw = true;
+  const contracts = <ContractModelStatic>sequelize.define('contracts', {
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER,
+    },
+    name: {
+      type: new DataTypes.STRING(128),
+      allowNull: false,
+    },
+    sourceCode: {
+      type: new DataTypes.STRING(10000),
+      allowNull: false,
+    },
+    abi: {
+      type: new DataTypes.STRING(10000),
+      allowNull: false,
+    },
+    bytecode: {
+      type: new DataTypes.STRING(10000),
+      allowNull: false,
+    },
+    runtimeBycode: {
+      type: new DataTypes.STRING(10000),
+      allowNull: false,
+    },
+    address: {
+      type: new DataTypes.STRING(128),
+      allowNull: false,
+    },
+    connectionId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: connections,
+        key: 'id'
       }
+    },
+    creationDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    lastExecutionDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    transactionCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     }
-  });
-
-  // eslint-disable-next-line no-unused-vars
-  (contracts as any).associate = function (models: any) {
-    // Define associations here
-    // See http://docs.sequelizejs.com/en/latest/docs/associations/
-  };
+  },
+    {
+      hooks: {
+        beforeCount(options: any) {
+          options.raw = true;
+        }
+      },
+      // TODO: DO I need this index?
+      // indexes: [{
+      //   unique: true,
+      //   fields: ['address']
+      // }]
+    });
 
   return contracts;
 }

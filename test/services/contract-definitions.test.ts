@@ -1,6 +1,6 @@
-import app from '../../src/app';
 import { buildFakeContractDefinition, ContractDefinition } from '@solidstudio/solid.types';
 
+import app from '../../src/app';
 
 describe('ContractDefinitions service', () => {
 
@@ -24,11 +24,21 @@ describe('ContractDefinitions service', () => {
     const contractDefinition: ContractDefinition = await service.create(sampleContractDefinition);
 
     expect(contractDefinition).toBeTruthy()
-    expect(contractDefinition.name).toEqual(sampleContractDefinition.name)
-    expect(contractDefinition.sourceCode).toEqual(sampleContractDefinition.sourceCode)
-    expect(contractDefinition.bytecode).toEqual(sampleContractDefinition.bytecode)
-    expect(contractDefinition.abi).toEqual(sampleContractDefinition.abi)
-    expect(contractDefinition.id).toBeGreaterThan(0)
-    expect(contractDefinition.id).toBeTruthy()
+
+    const contractDefinitionFoundResult = await service.find({
+      id: sampleContractDefinition.id
+    })
+
+    expect(contractDefinitionFoundResult).toBeTruthy()
+
+    const contractDefinitionFound: ContractDefinition = contractDefinitionFoundResult.data[0];
+
+    expect(contractDefinitionFound.id).toBeGreaterThan(0)
+    expect(contractDefinitionFound.id).toBeTruthy()
+    expect(contractDefinitionFound.name).toEqual(sampleContractDefinition.name)
+    expect(contractDefinitionFound.sourceCode).toEqual(sampleContractDefinition.sourceCode)
+    expect(contractDefinitionFound.abi).toEqual(sampleContractDefinition.abi)
+    expect(contractDefinitionFound.bytecode).toEqual(sampleContractDefinition.bytecode)
+    expect(contractDefinitionFound.runtimeBycode).toEqual(sampleContractDefinition.runtimeBycode)
   });
 });

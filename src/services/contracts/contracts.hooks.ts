@@ -1,10 +1,13 @@
 
+import beforeCreateContract from '../../hooks/before-create-contract';
+import afterFindContract from '../../hooks/after-find-contract';
+
 export default {
   before: {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [beforeCreateContract()],
     update: [],
     patch: [],
     remove: []
@@ -12,8 +15,8 @@ export default {
 
   after: {
     all: [],
-    find: [],
-    get: [],
+    find: [afterFindContract()],
+    get: [afterFindContract()],
     create: [],
     update: [],
     patch: [],
