@@ -84,6 +84,8 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
     private readonly contractsService: Contracts
     private readonly blocksService: Blocks
     private readonly transactionReceiptsService: TransactionReceipts
+
+    // web3 wrapper methods
     private readonly rateLimitedGetTransactionReceipt: (txHash: string) => Promise<TransactionReceipt>
     private readonly rateLimitedGetTransaction: (txHash: string) => Promise<Transaction>
     private readonly rateLimitedGetBlock: (blockNumber: number) => Promise<Block>
@@ -109,17 +111,12 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
         this.startTime = Date.now()
         this.web3Wrapper = web3Wrapper
 
-        this.rateLimitedGetTransaction = this.limiter.wrap(this.getTransaction.bind(this))
-        this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.getTransactionReceipt.bind(this))
-        this.rateLimitedGetBlockNumber = this.limiter.wrap(this.getBlockNumber.bind(this))
-        this.rateLimitedGetBlock = this.limiter.wrap(this.getBlock.bind(this))
-        this.rateLimitedGetTransactionCount = this.limiter.wrap(this.getTransactionCount.bind(this))
-        this.rateLimitedGetCode = this.limiter.wrap(this.getCode.bind(this))
-
-        // TODO: to change by real web3 wrapper
-        // this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.web3Wrapper.getTransactionReceipt.bind(this))
-        // this.rateLimitedGetBlockNumber = this.limiter.wrap(this.web3Wrapper.getBlockNumber.bind(this))
-        // this.rateLimitedGetBlock = this.limiter.wrap(this.web3Wrapper.getBlock.bind(this))
+        this.rateLimitedGetTransaction = this.limiter.wrap(this.web3Wrapper.getTransaction.bind(this))
+        this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.web3Wrapper.getTransactionReceipt.bind(this))
+        this.rateLimitedGetBlockNumber = this.limiter.wrap(this.web3Wrapper.getBlockNumber.bind(this))
+        this.rateLimitedGetBlock = this.limiter.wrap(this.web3Wrapper.getBlock.bind(this))
+        this.rateLimitedGetTransactionCount = this.limiter.wrap(this.web3Wrapper.getTransactionCount.bind(this))
+        this.rateLimitedGetCode = this.limiter.wrap(this.web3Wrapper.getCode.bind(this))
 
         this.asyncPolling = pollingServiceFactory.createPolling(async (end) => {
             await this.synchronize()
@@ -162,33 +159,26 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
             console.log("TransactionReceipts", transactionReceipts)
             console.log("Transactions", transactions)
             console.log("Contracts", contracts)
-            // store in DB as a transaction or simply store to the database using services...
-            // TRANSACTION
-            // Save Block
-            // Save TransactionReceipts
-            // Save Transactions
-            // Update Current Connection (Last block processed)
 
-            const { Block, Transaction, TransactionReceipt } = this.sequelize.models;
-
-            // app.get('sequelizeClient').transaction(transOptions, transaction => {
-            //     return app.service('serviceName').create({data},{ sequelize: { transaction}  })
-            // })
             return this.sequelize.transaction(transaction => {
-                return this.blocksService.create(block, { sequelize: { transaction } })
+                return this.blocksService.create(block, { sequelize: { transaction } }) // Blocks
                     .then((whatIsThis) => {
                         console.log("whatIsThis blocks", whatIsThis)
-                        return this.transactionsService.create(transactions, { sequelize: { transaction } })
+                        return this.transactionsService.create(transactions, { sequelize: { transaction } }) // Transactions
                             .then((whatIsThis) => {
                                 console.log("whatIsThis transactionsService", whatIsThis)
-                                return this.transactionReceiptsService.create(transactionReceipts, { sequelize: { transaction } })
+                                return this.transactionReceiptsService.create(transactionReceipts, { sequelize: { transaction } }) // Transaction Receipts
                                     .then((whatIsThis) => {
                                         console.log("whatIsThis transactionReceiptsService", whatIsThis)
-                                        if (this.connection.id) {
-                                            return this.connectionService.update(this.connection.id, {
-                                                lastBlockNumberProcessed: blockNumber
+                                        return this.contractsService.create(contracts, { sequelize: { transaction } }) // Contracts
+                                            .then((whatIsThis) => {
+                                                console.log("whatIsThis contractsService", whatIsThis)
+                                                if (this.connection.id) {
+                                                    return this.connectionService.update(this.connection.id, {
+                                                        lastBlockNumberProcessed: blockNumber
+                                                    })
+                                                }
                                             })
-                                        }
                                     })
                             })
                     })
@@ -207,6 +197,7 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
     }
 
     async getContracts(transactionReceipts: TransactionReceipt[]) {
+        // TODO: Error handling and retry
         const result: Contract[] = []
 
         const contractsCreationReceipts = transactionReceipts.filter((item) => {
@@ -247,55 +238,36 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
         return result;
     }
 
-    getTransactions(block: Block) { // TODO: Add Retry in case something fails...
-        console.log("Calling getTransactions", Date.now() - this.startTime)
-        const promises = block.transactions.map((item) => {
-            return this.rateLimitedGetTransaction(item)
-        })
-        console.log('getTransactions PROMISES', promises)
-        return Promise.all(promises)
+    async getTransactions(block: Block) {
+        let result: Transaction[] = []
+        try {
+            console.log("Calling getTransactions", Date.now() - this.startTime)
+            const promises = block.transactions.map((item) => {
+                return this.rateLimitedGetTransaction(item)
+            })
+            console.log('getTransactions PROMISES', promises)
+            result = await Promise.all(promises)
+        } catch (error) {
+            console.log("ERROR in getTransactions", error.message)
+            // TODO RETRY...
+        }
+        return result
     }
 
-    getTransactionReceipts(block: Block) {
-        console.log("Calling getTransactionReceipts", Date.now() - this.startTime)
-        const promises = block.transactions.map((item) => {
-            return this.rateLimitedGetTransactionReceipt(item)
-        })
-        console.log('getTransactionReceipts PROMISES', promises)
-        return Promise.all(promises)
-        // const result = Promise.all(promises)
-        // filter empty receipts.. add a try catch...
-        // 
-    }
-
-    getBlockNumber() {
-        console.log("Calling getBlockNumber", Date.now() - this.startTime)
-        return Promise.resolve(2);
-    }
-
-    getBlock(blockNumber: number) {
-        console.log(`Calling getBlock ${blockNumber}`, Date.now() - this.startTime)
-        return Promise.resolve(buildFakeBlock())
-    }
-
-    getTransaction() {
-        console.log("Calling getTransaction", Date.now() - this.startTime)
-        return Promise.resolve(buildFakeTransaction())
-    }
-
-    getTransactionReceipt() {
-        console.log("Calling getTransactionReceipt", Date.now() - this.startTime)
-        return Promise.resolve(buildFakeTransactionReceipt())
-    }
-
-    getTransactionCount() {
-        console.log("Calling getTransactionCount", Date.now() - this.startTime)
-        return Promise.resolve(2);
-    }
-
-    getCode() {
-        console.log("Calling getCode", Date.now() - this.startTime)
-        return Promise.resolve("pragma solidity 0.4.12;..");
+    async getTransactionReceipts(block: Block) {
+        let result: TransactionReceipt[] = []
+        try {
+            console.log("Calling getTransactionReceipts", Date.now() - this.startTime)
+            const promises = block.transactions.map((item) => {
+                return this.rateLimitedGetTransactionReceipt(item)
+            })
+            console.log('getTransactionReceipts PROMISES', promises)
+            result = await Promise.all(promises)
+        } catch (error) {
+            console.log("ERROR in getTransactionReceipts", error.message)
+            // TODO RETRY...
+        }
+        return result
     }
 
     private sequenceBetween(start: number, end: number): number[] {

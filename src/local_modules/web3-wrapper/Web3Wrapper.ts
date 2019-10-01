@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import { TransactionReceipt } from 'web3-core'
+import { TransactionReceipt, Transaction } from 'web3-core'
 import { Block } from 'web3-eth'
 
 import { IWeb3Wrapper } from './IWeb3Wrapper'
@@ -40,16 +40,19 @@ export class Web3Wrapper implements IWeb3Wrapper {
     return await this.instance.eth.getBlock(blockNumber)
   }
 
+  getTransaction = async (txHash: string): Promise<Transaction> => {
+    return await this.instance.eth.getTransaction(txHash)
+  }
+
   getTransactionReceipt = async (txHash: string): Promise<TransactionReceipt> => {
     return await this.instance.eth.getTransactionReceipt(txHash)
   }
 
+  getTransactionCount = async (contractAddress: string): Promise<number> => {
+    return await this.instance.eth.getTransactionCount(contractAddress)
+  }
 
   getCode = async (contractAddress: string): Promise<string> => {
     return await this.instance.eth.getCode(contractAddress)
-  }
-
-  getTransactionCount = async (contractAddress: string): Promise<number> => {
-    return await this.instance.eth.getTransactionCount(contractAddress)
   }
 }
