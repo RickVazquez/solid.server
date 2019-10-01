@@ -1,4 +1,5 @@
 
+import afterFindTrace from '../../hooks/after-find-trace';
 export default {
   before: {
     all: [],
@@ -12,8 +13,8 @@ export default {
 
   after: {
     all: [],
-    find: [],
-    get: [],
+    find: [afterFindTrace()],
+    get: [afterFindTrace()],
     create: [],
     update: [],
     patch: [],
