@@ -48,11 +48,10 @@ export default function (app: Application) {
           options.raw = true;
         }
       },
-      // TODO FUTURE, check if I need indexes
-      // indexes: [{
-      //   unique: true,
-      //   fields: ['runtimeBycode']
-      // }]
+      indexes: [{
+        // unique: true,
+        fields: ['runtimeBycode']
+      }]
     });
 
   return contractDefinitions;
