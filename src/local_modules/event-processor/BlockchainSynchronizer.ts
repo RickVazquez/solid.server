@@ -111,10 +111,15 @@ export class BlockchainSynchronizer implements IBlockchainProcessor {
 
         this.rateLimitedGetTransaction = this.limiter.wrap(this.getTransaction.bind(this))
         this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.getTransactionReceipt.bind(this))
-        this.rateLimitedGetBlockNumber = this.limiter.wrap(this.getBlockNumber.bind(this)) // TODO: to change by real web3 wrapper
+        this.rateLimitedGetBlockNumber = this.limiter.wrap(this.getBlockNumber.bind(this))
         this.rateLimitedGetBlock = this.limiter.wrap(this.getBlock.bind(this))
         this.rateLimitedGetTransactionCount = this.limiter.wrap(this.getTransactionCount.bind(this))
         this.rateLimitedGetCode = this.limiter.wrap(this.getCode.bind(this))
+
+        // TODO: to change by real web3 wrapper
+        // this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.web3Wrapper.getTransactionReceipt.bind(this))
+        // this.rateLimitedGetBlockNumber = this.limiter.wrap(this.web3Wrapper.getBlockNumber.bind(this))
+        // this.rateLimitedGetBlock = this.limiter.wrap(this.web3Wrapper.getBlock.bind(this))
 
         this.asyncPolling = pollingServiceFactory.createPolling(async (end) => {
             await this.synchronize()

@@ -2,7 +2,7 @@
 import Bottleneck from 'bottleneck'
 import { TransactionReceipt } from 'web3-core'
 
-import { Connection, BlockProcessed, Transaction, ContractDefinition, Contract } from '@solidstudio/solid.types'
+import { Connection, Transaction, ContractDefinition, Contract } from '@solidstudio/solid.types'
 
 import { Application } from '../../declarations'
 import { IWeb3Wrapper } from '../web3-wrapper/IWeb3Wrapper'
@@ -12,11 +12,13 @@ import { ContractDefinitions } from '../../services/contract-definitions/contrac
 import { Transactions } from '../../services/transactions/transactions.class'
 import { Connections } from '../../services/connections/connections.class'
 import { Contracts } from '../../services/contracts/contracts.class'
+import { Blocks } from '../../services/blocks/blocks.class'
 
 import { IBlockchainProcessor } from './IBlockchainProcessor'
 import { IPollingService } from './IPollingService'
 
 const POLLING_INTERVAL = 1000 // TODO, move to factory, singleton class
+
 
 export class BlockchainProcessor implements IBlockchainProcessor {
   asyncPolling: IBlockchainProcessor
@@ -26,7 +28,7 @@ export class BlockchainProcessor implements IBlockchainProcessor {
   transactionsService: Transactions
   contractDefinitionsService: ContractDefinitions
   contractsService: Contracts
-
+  blocksService: Blocks
   readonly rateLimitedGetTransactionReceipt: (txHash: string) => Promise<TransactionReceipt>
   readonly rateLimitedGetBlock: (blockNumber: number) => Promise<any>
   readonly rateLimitedGetBlockNumber: () => Promise<number>
@@ -41,12 +43,11 @@ export class BlockchainProcessor implements IBlockchainProcessor {
 
     this.connectionService = app.service('connections')
     this.transactionsService = app.service('transactions')
+    this.blocksService = app.service('blocks')
     this.contractDefinitionsService = app.service('contract-definitions')
     this.contractsService = app.service('contracts')
     this.connection = connection
     this.web3Wrapper = web3Wrapper
-    console.log("Web wrapper", web3Wrapper)
-    // const rateLimiter: RateLimiter = new RateLimiter(parseInt(process.env.BLOCKCHAIN_MAX_REQUESTS_PER_SECOND || '10'));
     this.rateLimitedGetTransactionReceipt = this.limiter.wrap(this.web3Wrapper.getTransactionReceipt.bind(this))
     this.rateLimitedGetBlockNumber = this.limiter.wrap(this.web3Wrapper.getBlockNumber.bind(this))
     this.rateLimitedGetBlock = this.limiter.wrap(this.web3Wrapper.getBlock.bind(this))
@@ -65,46 +66,58 @@ export class BlockchainProcessor implements IBlockchainProcessor {
     this.asyncPolling.stop()
   }
 
-  async processBlock(lastBlock: BlockProcessed, blockNumber: number) {
-    console.log(`Processing block ${blockNumber}`)
-    const processedBlock = false
-    const txProcessed = 0
-    try {
-      const block = await this.rateLimitedGetBlock(blockNumber)
-      const transactions = block.transactions
-      let transactionStart = 0
-      console.log('Transactions', block.transactions)
-      if (lastBlock.blockNumber === blockNumber) {
-        // const transactionsAsString = transactions.map((item) => {
-        //     return item.value;
-        // })
-        transactionStart = transactions.indexOf(lastBlock.transactionHash)
-        console.log('transactionStart', transactionStart)
-        // If we are processing the first block
-        if (transactionStart === -1) {
-          transactionStart = 0
-        }
-      }
-      for (const tx of transactions.slice(transactionStart, transactions.length)) {
-        console.log('Transaction', tx)
-        await this.processTransaction(lastBlock, blockNumber, tx as any)
-      }
-    } catch (error) {
-      console.error(`BlockProcessingError: Error processing block ${blockNumber}. Retrying`)
-      console.log(`Error message: ${error.message}`)
-    }
-  }
-
   private async getBlocks() {
     console.log('Starting getBlocks')
     try {
-      const blockNumber = await this.rateLimitedGetBlockNumber()
-      if (!this.connection.lastBlockProcessed) {
-        throw new Error("Connection lastBlockProcessed is undefined")
-      }
-      const lastProcessedBlockNumber = this.connection.lastBlockProcessed.blockNumber
-      console.log('lastProcessedBlockNumber inside', lastProcessedBlockNumber)
+      // 100 en 100
+      // get blocks
+      // count transactions
+      // split between operations
+      // done..
+      // approaches
 
+      // 2 modes: isSynchronizing, then poll full, otherwise a job worker
+      // Synchonizing...
+      /**
+       * Options, 
+       * de 100 en 100, primero blocks
+       * luego transactions
+       * luego receipts
+       * 
+       * en Batch and retry until block is processed
+       * then bulk save
+       * 
+       * Coordinator
+       * 
+       * Operations
+       * getBlockNumber
+       * getBlock
+       * getTransaction
+       * getTransactionReceipt
+       * getCode
+       * getTransactionCount* (could be skip for contract creation)
+       * 
+       * 
+       * Parameters
+       * 
+       * Transactions per second = 5
+       * 
+       * Get block number
+       * Get last block processed
+       * Start from there
+       * Get block
+       * Save block
+       * Get transactions
+       * Save transactions
+       * Get transaction receipts
+       * Save transaction receipts
+       * 
+       * 
+       */
+      const blockNumber = await this.rateLimitedGetBlockNumber()
+      const lastProcessedBlockNumber = this.connection.lastBlockNumberProcessed || 0
+      const lastTransactionHashProcessed = this.connection.lastTransactionHashProcessed || ''
+      console.log('lastProcessedBlockNumber inside', lastProcessedBlockNumber)
       if (lastProcessedBlockNumber > blockNumber) {
         console.error(
           'BlockNumberInconsistency: Last processed block in DB is higher than last block in the blockchain'
@@ -117,25 +130,55 @@ export class BlockchainProcessor implements IBlockchainProcessor {
       console.log('lastProcessedBlockNumber', lastProcessedBlockNumber)
       const blocksSequence = this.sequenceBetween(lastProcessedBlockNumber, blockNumber)
       for (const block of blocksSequence) {
-        await this.processBlock(this.connection.lastBlockProcessed, block)
+        await this.processBlock(lastProcessedBlockNumber, lastTransactionHashProcessed, block)
       }
     } catch (error) {
       console.error(`Error processing blocks, retrying, ${error.message}, ${this.rateLimitedGetBlockNumber}`)
     }
   }
 
-  private async processTransaction(lastBlock: BlockProcessed, blockNumber: number, txHash: string) {
+  async processBlock(lastBlockNumber: number, lastTransactionHashProcessed: string, blockNumber: number) {
+    console.log(`Processing block ${blockNumber}`)
+    const processedBlock = false
+    const txProcessed = 0
+    try {
+      const block = await this.rateLimitedGetBlock(blockNumber)
+      // TODO: Save block
+      await this.blocksService.create(block); // careful cause this is not transactional, it would be nice to make it transactional from here..
+      const transactions = block.transactions
+      let transactionStart = 0
+      console.log('Transactions', block.transactions)
+      if (lastBlockNumber === blockNumber) {
+        transactionStart = transactions.indexOf(lastTransactionHashProcessed)
+        console.log('transactionStart', transactionStart)
+        // If we are processing the first transaction
+        if (transactionStart === -1) {
+          transactionStart = 0
+        }
+      }
+      for (const tx of transactions.slice(transactionStart, transactions.length)) {
+        console.log('Transaction', tx)
+        await this.processTransaction(lastTransactionHashProcessed, blockNumber, tx as any)
+      }
+    } catch (error) {
+      console.error(`BlockProcessingError: Error processing block ${blockNumber}. Retrying`)
+      console.log(`Error message: ${error.message}`)
+    }
+  }
+
+  private async updateLastBlockProcessed(newLastTransactionHashProcessed: number, newLastProcessedBlockNumber: number) {
+    if (this.connection.id) {
+      await this.connectionService.update(this.connection.id, this.connection)
+    }
+  }
+
+  private async processTransaction(lastTransactionHashProcessed: string, blockNumber: number, txHash: string) {
     console.log(`Processing transaction ${txHash}, blocknumber: ${blockNumber}`)
-    // let logIndexStart = 0
-    // if (lastBlock.transactionHash === txHash) {
-    //     logIndexStart = lastBlock.logIndex + 1
-    // }
-    if (lastBlock.transactionHash === txHash) {
+    if (lastTransactionHashProcessed === txHash) {
       return
     }
     const receipt = await this.rateLimitedGetTransactionReceipt(txHash)
     if (receipt) {
-
       //TODO NOW: I Need to push the transaction receipt 
       // this.connection.transactionReceipts.push(receipt)
       const newTransaction: Transaction = {
@@ -159,16 +202,13 @@ export class BlockchainProcessor implements IBlockchainProcessor {
           return element.runtimeBycode === runtimeByteCode
         });
 
-        // connectionId as number in Contract 
-        // runtimeBycode in ContractDefinition
-
         const newContract: Contract = {
           name: itemFound ? itemFound.name : "--",
           sourceCode: itemFound ? itemFound.sourceCode : "--",
           abi: itemFound ? itemFound.abi : [],
           bytecode: itemFound ? itemFound.bytecode : "",
           address: receipt.contractAddress,
-          connectionId: this.connection.id,
+          connectionId: this.connection.id || 0,
           creationDate: new Date().toLocaleDateString(),
           lastExecutionDate: new Date().toLocaleDateString(),
           transactionCount: transactionCount
@@ -177,68 +217,14 @@ export class BlockchainProcessor implements IBlockchainProcessor {
         this.contractsService.create(newContract)
       }
 
-      if (this.connection.lastBlockProcessed) {
-        this.connection.lastBlockProcessed.blockNumber = blockNumber
-        this.connection.lastBlockProcessed.transactionHash = txHash
-        await this.connectionService.update(this.connection.id, this.connection)
+      if (this.connection.lastBlockNumberProcessed) {
+        this.connection.lastBlockNumberProcessed = blockNumber
+        this.connection.lastTransactionHashProcessed = txHash
+        if (this.connection.id) {
+          await this.connectionService.update(this.connection.id, this.connection)
+        }
       }
-
-
     }
-    // const logs = receipt.logs
-    // console.log("LOGS", logs) // why do I need the logs?
-    // if (!Array.isArray(logs) || !logs.length) {
-    //     console.log(`Saving empty transaction: ${txHash}, blockNumber: ${blockNumber}`)
-
-    //     const newLastBlockProcessed = {
-    //         blockNumber,
-    //         transactionHash: txHash,
-    //         logIndex: 0
-    //     }
-
-    //     this.connection.lastBlockProcessed = newLastBlockProcessed
-    //     await this.repository.update(this.connection._id, this.connection)
-    // }
-    // then, I need to save the transactions too
-    // for (const log of logs.slice(logIndexStart, logs.length)) {
-    //     const logIndex = logs.indexOf(log)
-    //     const eventObject = this.createEventObject(log, blockNumber, txHash, receipt.transactionIndex, logIndex)
-    //     // I think I need to store the events too..
-    //     try {
-    //         console.log(`Event detected. Saving to the database, blockNumber: ${blockNumber}, transaction hash: ${txHash}, log index: ${logIndex}`)
-    //         // Save event to the database eventObject
-    //     } catch (error) {
-    //         console.error('Unable to save the event in the database, trying again later ', {
-    //             blockNumber,
-    //             txHash,
-    //             index: logIndex,
-    //             error: 'proccessingEvent',
-    //             errorMessage: error.message
-    //         })
-    //         return
-    //     }
-
-    //     const newLastBlockProcessed = {
-    //         blockNumber,
-    //         transactionHash: txHash,
-    //         logIndex: logIndex
-    //     }
-
-    //     this.connection.lastBlockProcessed = newLastBlockProcessed
-    //     await this.repository.update(this.connection._id, this.connection)
-    // }
-  }
-
-  private createEventObject(log: any, blockNumber: number, txHash: string, txIndex, logIndex: number): IEventObject {
-    const eventObject: IEventObject = {
-      contractAddress: log.address,
-      data: log.data,
-      blockNumber,
-      transactionIndex: txIndex,
-      transactionHash: txHash,
-      logIndex
-    }
-    return eventObject
   }
 
   private sequenceBetween(start: number, end: number): number[] {
@@ -247,18 +233,3 @@ export class BlockchainProcessor implements IBlockchainProcessor {
       .map((_, idx) => start + idx)
   }
 }
-
-interface IEventObject {
-  contractAddress: string
-  data: string
-  blockNumber: number
-  transactionHash: string
-  transactionIndex: number
-  logIndex: number
-}
-
-
-/**
-
-No tengo migrations, pero para demo
-*/

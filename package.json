@@ -42,7 +42,7 @@
     "@feathersjs/express": "^4.3.1",
     "@feathersjs/feathers": "^4.3.1",
     "@feathersjs/socketio": "^4.3.1",
-    "@solidstudio/solid.types": "^1.1.8",
+    "@solidstudio/solid.types": "^1.1.9",
     "async-polling": "^0.2.1",
     "bottleneck": "^2.19.5",
     "compression": "^1.7.4",
