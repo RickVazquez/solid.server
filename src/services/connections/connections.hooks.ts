@@ -1,5 +1,7 @@
 
-import poller from '../../hooks/poller';
+import afterCreateConnection from '../../hooks/after-create-connection';
+import beforeDeleteConnection from '../../hooks/before-delete-connection';
+
 export default {
   before: {
     all: [],
@@ -8,16 +10,16 @@ export default {
     create: [],
     update: [],
     patch: [],
-    remove: []
+    remove: [beforeDeleteConnection()]
   },
 
   after: {
     all: [],
     find: [],
     get: [],
-    create: [poller()],
-    update: [],
-    patch: [],
+    create: [afterCreateConnection()],
+    update: [], // TODO: Should I restart here? afterCreateConnection()
+    patch: [], // TODO: Should I restart here? afterCreateConnection()
     remove: []
   },
 
