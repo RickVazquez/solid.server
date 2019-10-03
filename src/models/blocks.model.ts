@@ -93,13 +93,13 @@ export default function (app: Application) {
       type: DataTypes.STRING(5000), // ARRAY
       allowNull: false,
     },
-    connectionId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: connections,
-        key: 'id'
-      }
-    }
+    // connectionId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: connections,
+    //     key: 'id'
+    //   }
+    // }
   }, {
     hooks: {
       beforeCount(options: any) {
@@ -114,7 +114,9 @@ export default function (app: Application) {
     // unique: true,
     // fields: ['hash']
     // }
-  })
+  });
+
+  blocks.belongsTo(connections, { onDelete: 'cascade' })
 
   return blocks;
 }

@@ -54,13 +54,13 @@ export default function (app: Application) {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    connectionId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: connections,
-        key: 'id'
-      }
-    }
+    // connectionId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: connections,
+    //     key: 'id'
+    //   }
+    // }
   }, {
     hooks: {
       beforeCount(options: any) {
@@ -69,9 +69,11 @@ export default function (app: Application) {
     },
     indexes: [{
       unique: true,
-      fields: ['transactionHash', 'contractAddress']
+      fields: ['transactionHash']
     }]
   })
+
+  transactionReceipts.belongsTo(connections, { onDelete: 'cascade' })
 
   return transactionReceipts;
 }

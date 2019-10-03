@@ -45,13 +45,13 @@ export default function (app: Application) {
       type: new DataTypes.STRING(128),
       allowNull: false,
     },
-    connectionId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: connections,
-        key: 'id'
-      }
-    },
+    // connectionId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: connections,
+    //     key: 'id'
+    //   }
+    // },
     creationDate: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -77,6 +77,8 @@ export default function (app: Application) {
       //   fields: ['address']
       // }]
     });
+
+  contracts.belongsTo(connections, { onDelete: 'cascade' })
 
   return contracts;
 }

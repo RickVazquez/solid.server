@@ -41,7 +41,23 @@ export default function (app: Application) {
         options.raw = true;
       }
     }
-  })
+  });
+
+  // TODO REMOVE THIS 
+  // eslint-disable-next-line no-unused-vars
+  // (connections as any).associate = function (models: any) {
+  //   // Define associations here
+  //   // See http://docs.sequelizejs.com/en/latest/docs/associations/
+  //   connections.hasMany(models.blocks, { onDelete: 'cascade' });
+  //   connections.hasMany(models.transactions, { onDelete: 'cascade' });
+  //   connections.hasMany(models.transaction_receipts, { onDelete: 'cascade' });
+  // };
+  // console.log("MODELS", sequelize.models)
+  // connections.hasMany(sequelize.models.blocks, { onDelete: 'cascade' });
+  // connections.hasMany(sequelize.models.transactions, { onDelete: 'cascade' });
+  // connections.hasMany(sequelize.models.transaction_receipts, { onDelete: 'cascade' });
+
+  // console.log("MODELS CONNECTIONS", sequelize.models)
 
   return connections;
 }
