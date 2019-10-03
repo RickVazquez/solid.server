@@ -22,7 +22,7 @@
     "npm": ">= 3.0.0"
   },
   "scripts": {
-    "test:blockchain": "jest BlockchainSynchronizer.test.ts --silent=false --verbose",
+    "test:blockchain": "jest BlockchainSynchronizer.test.ts --silent=false --verbose --forceExit --watch",
     "test:blocks": "jest blocks.test.ts --forceExit --watch --silent=false --verbose",
     "test:transactions": "jest transactions.test.ts --forceExit --watch --silent=false --verbose",
     "test:transactions-receipts": "jest transaction-receipts.test.ts --forceExit --watch --silent=false --verbose",
@@ -42,7 +42,7 @@
     "@feathersjs/express": "^4.3.1",
     "@feathersjs/feathers": "^4.3.1",
     "@feathersjs/socketio": "^4.3.1",
-    "@solidstudio/solid.types": "^1.1.9",
+    "@solidstudio/solid.types": "^1.1.10",
     "async-polling": "^0.2.1",
     "bottleneck": "^2.19.5",
     "compression": "^1.7.4",
@@ -55,6 +55,7 @@
     "serve-favicon": "^2.5.0",
     "sqlite3": "^4.1.0",
     "web3": "^1.0.0-beta.55",
+    "web3-utils": "^1.0.0-beta.55",
     "winston": "^3.2.1"
   },
   "devDependencies": {

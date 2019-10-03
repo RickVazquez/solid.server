@@ -4,9 +4,7 @@ import path from 'path';
 
 export default function (app: Application) {
   const connectionString = app.get('sqlite');
-  const folderName = 'data'
   const connectionPath = path.join(__dirname, '..', connectionString)
-  console.log("connectionPath", connectionPath)
   const sequelize = new Sequelize({
     dialect: 'sqlite',
     logging: false,
