@@ -1,11 +1,12 @@
 {
   "host": "localhost",
-  "port": 3040,
+  "port": 3030,
   "public": "../public/",
   "paginate": {
     "default": 10,
     "max": 50
   },
   "ts": true,
-  "sqlite": "solid_server.sqlite"
+  "sqlite": "solid_server.sqlite",
+  "nedb": "../data"
 }
