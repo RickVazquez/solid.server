@@ -20,7 +20,8 @@
     "start": "ts-node-dev --no-notify src/"
   },
   "dependencies": {
-    "@solid-explorer/server": "^1.0.0"
+    "@solid-explorer/server": "^1.1.0",
+    "@solid-explorer/types": "^1.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
